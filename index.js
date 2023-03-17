@@ -1,8 +1,9 @@
 require("dotenv").config();
 
 const express = require("express");
-const cors = require("cors");
+//const cors = require("cors");
 const fileUpload = require("express-fileupload");
+const helmet = require("helmet");
 const fs = require("fs");
 const app = express();
 const mongoose = require("mongoose");
@@ -19,7 +20,8 @@ mongoose.connect(
 
 // app stuff
 app.use(express.json({ limit: "50mb" }));
-app.use(cors());
+app.use(helmet());
+//app.use(cors());
 
 // CHECK IF USING API_KEY
 const authAPI = (API_KEY) => {
