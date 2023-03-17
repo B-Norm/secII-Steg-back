@@ -11,12 +11,11 @@ const UserModel = require("./models/users.js");
 const FileModel = require("./models/files.js");
 const API_KEY = process.env.API_KEY;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3001;
 const jwt = require("jsonwebtoken");
 // TODO: Deploy website to Azure
-mongoose.connect(
-  "mongodb+srv://user123:user123@stegproj.ljxs7zz.mongodb.net/stegDB?retryWrites=true&w=majority"
-);
+mongoose.connect(MONGO_URI);
 
 // app stuff
 app.use(express.json({ limit: "50mb" }));
