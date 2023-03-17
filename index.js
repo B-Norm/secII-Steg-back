@@ -12,13 +12,13 @@ const API_KEY = process.env.API_KEY;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const PORT = process.env.PORT || 3001;
 const jwt = require("jsonwebtoken");
-
+// TODO: Deploy website to Azure
 mongoose.connect(
   "mongodb+srv://user123:user123@stegproj.ljxs7zz.mongodb.net/stegDB?retryWrites=true&w=majority"
 );
 
 // app stuff
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "50mb" }));
 app.use(cors());
 
 // CHECK IF USING API_KEY
@@ -109,18 +109,25 @@ app.post("/api/login", authAPI(API_KEY), async (req, res) => {
 // add steg image to db
 app.post("/api/upload", authToken, async (req, res) => {
   if (
-    !validateParams(req.body, ["stegName", "file", "mSkip", "mPeriod", "mName"])
+    !validateParams(req.body, [
+      "stegName",
+      "file",
+      "mSkip",
+      "mPeriod",
+      "mName",
+      "mSize",
+    ])
   ) {
     console.log("/api/upload: wrong input");
     return res.status(400);
   }
-
   var new_file = new FileModel({
     stegName: req.body.stegName,
     file: req.body.file,
     mName: req.body.mName,
     mSkip: req.body.mSkip,
     mPeriod: req.body.mPeriod,
+    mSize: req.body.mSize,
   });
 
   await new_file
@@ -129,6 +136,7 @@ app.post("/api/upload", authToken, async (req, res) => {
       return res.status(200).json({
         msg: "file added",
         status: 200,
+        data: req.body.file,
       });
     })
     .catch((err) => {
@@ -138,6 +146,18 @@ app.post("/api/upload", authToken, async (req, res) => {
         status: 400,
       });
     });
+});
+
+// get all files from DB
+app.get("/api/getFiles", authAPI(API_KEY), async (req, res) => {
+  try {
+    console.log("Loading Files to Client");
+    const files = await FileModel.find();
+    res.status(200).json(files);
+  } catch (err) {
+    console.log("Error sending files to client");
+    res.status(500).json({ message: err.message });
+  }
 });
 
 const validateParams = (body, params) => {

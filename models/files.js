@@ -7,7 +7,7 @@ const fileSchema = new mongoose.Schema(
       required: true,
     },
     file: {
-      type: Array,
+      type: String,
       required: true,
     },
     mName: {
@@ -20,6 +20,10 @@ const fileSchema = new mongoose.Schema(
     },
     mPeriod: {
       type: Array,
+      required: true,
+    },
+    mSize: {
+      type: Number,
       required: true,
     },
   },
