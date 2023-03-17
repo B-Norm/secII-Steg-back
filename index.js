@@ -6,6 +6,7 @@ const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const fs = require("fs");
 const app = express();
+const cors = require("cors");
 const mongoose = require("mongoose");
 const UserModel = require("./models/users.js");
 const FileModel = require("./models/files.js");
@@ -20,7 +21,7 @@ mongoose.connect(MONGO_URI);
 // app stuff
 app.use(express.json({ limit: "50mb" }));
 app.use(helmet());
-//app.use(cors());
+app.use(cors());
 
 // CHECK IF USING API_KEY
 const authAPI = (API_KEY) => {
