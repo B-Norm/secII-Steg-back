@@ -1,12 +1,10 @@
 require("dotenv").config();
 
 const express = require("express");
-//const cors = require("cors");
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const fs = require("fs");
 const app = express();
-const cors = require("cors");
 const mongoose = require("mongoose");
 const UserModel = require("./models/users.js");
 const FileModel = require("./models/files.js");
@@ -18,20 +16,26 @@ const jwt = require("jsonwebtoken");
 // TODO: Deploy website to Azure
 mongoose.connect(MONGO_URI);
 
+const db = mongoose.connection;
+
 // app stuff
 app.use(express.json({ limit: "50mb" }));
 app.use(helmet());
-app.use(cors());
+
+//const cors = require("cors");
+//app.use(cors());
 
 // CHECK IF USING API_KEY
 const authAPI = (API_KEY) => {
   return (req, res, next) => {
     //console.log("Authorization Middleware");
-    const token = req.headers["api_key"];
+    const token = req.headers["x-my-api-key"] || req.headers["api_key"];
     if (!token) {
-      return res.status(401).json({
-        status: 401,
+      return res.status(403).json({
+        status: 403,
         message: "Missing Authorization header",
+        SERVER_API: API_KEY,
+        HEADERS: req.headers,
       });
     } else {
       if (API_KEY != token) {
@@ -83,6 +87,16 @@ app.post("/api/login", authAPI(API_KEY), async (req, res) => {
 
     return res.status(400);
   }
+
+  db.on("error", (err) => {
+    res
+      .status(469)
+      .res.json({ message: `Failed to connect to MongoDB Atlas: ${err}` });
+  });
+
+  db.once("open", () => {
+    console.log("Connected to MongoDB Atlas");
+  });
 
   UserModel.findOne({ username: req.body.username }).then((user) => {
     if (user == null) {
@@ -138,7 +152,7 @@ app.post("/api/upload", authToken, async (req, res) => {
       return res.status(200).json({
         msg: "file added",
         status: 200,
-        data: req.body.file,
+        //data: req.body.file,
       });
     })
     .catch((err) => {
@@ -146,6 +160,7 @@ app.post("/api/upload", authToken, async (req, res) => {
       return res.status(401).json({
         msg: "File Error",
         status: 400,
+        error: err,
       });
     });
 });
