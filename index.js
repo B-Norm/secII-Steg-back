@@ -13,7 +13,7 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 3001;
 const jwt = require("jsonwebtoken");
-// TODO: Deploy website to Azure
+
 mongoose.connect(MONGO_URI);
 
 const db = mongoose.connection;
@@ -22,8 +22,8 @@ const db = mongoose.connection;
 app.use(express.json({ limit: "50mb" }));
 app.use(helmet());
 
-//const cors = require("cors");
-//app.use(cors());
+const cors = require("cors");
+app.use(cors());
 
 // CHECK IF USING API_KEY
 const authAPI = (API_KEY) => {
@@ -175,6 +175,24 @@ app.get("/api/getFiles", authAPI(API_KEY), async (req, res) => {
     console.log("Error sending files to client");
     res.status(500).json({ message: err.message });
   }
+});
+
+app.post("/api/deleteFile", authToken, async (req, res) => {
+  if (!validateParams(req.body, ["_id"])) {
+    console.log("/api/deleteFile: wrong input");
+    return res.status(400);
+  }
+  FileModel.deleteOne({ _id: req.body._id })
+    .then(() => {
+      return res.json({
+        msg: "File Deleted",
+        status: 200,
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ msg: err.message });
+    });
 });
 
 const validateParams = (body, params) => {
