@@ -1,9 +1,7 @@
 require("dotenv").config();
 
 const express = require("express");
-const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
-const fs = require("fs");
 const app = express();
 const mongoose = require("mongoose");
 const UserModel = require("./models/users.js");
@@ -28,7 +26,6 @@ app.use(cors());
 // CHECK IF USING API_KEY
 const authAPI = (API_KEY) => {
   return (req, res, next) => {
-    //console.log("Authorization Middleware");
     const token = req.headers["x-my-api-key"] || req.headers["api_key"];
     if (!token) {
       return res.status(403).json({
@@ -40,7 +37,7 @@ const authAPI = (API_KEY) => {
     } else {
       if (API_KEY != token) {
         return res.status(401).json({
-          status: 401,
+          status: 511,
           message: "Invalid API Key",
         });
       } else {
@@ -81,6 +78,7 @@ app.post("/api/register", authAPI(API_KEY), async (req, res) => {
     });
 });
 
+// find username and compare entered password with hash
 app.post("/api/login", authAPI(API_KEY), async (req, res) => {
   if (!validateParams(req.body, ["username", "password"])) {
     console.log("/api/login: wrong input");
@@ -124,16 +122,7 @@ app.post("/api/login", authAPI(API_KEY), async (req, res) => {
 
 // add steg image to db
 app.post("/api/upload", authToken, async (req, res) => {
-  if (
-    !validateParams(req.body, [
-      "stegName",
-      "file",
-      "mSkip",
-      "mPeriod",
-      "mName",
-      "mSize",
-    ])
-  ) {
+  if (!validateParams(req.body, ["stegName", "file", "mName", "mSize"])) {
     console.log("/api/upload: wrong input");
     return res.status(400);
   }
@@ -141,8 +130,6 @@ app.post("/api/upload", authToken, async (req, res) => {
     stegName: req.body.stegName,
     file: req.body.file,
     mName: req.body.mName,
-    mSkip: req.body.mSkip,
-    mPeriod: req.body.mPeriod,
     mSize: req.body.mSize,
   });
 
@@ -152,7 +139,6 @@ app.post("/api/upload", authToken, async (req, res) => {
       return res.status(200).json({
         msg: "file added",
         status: 200,
-        //data: req.body.file,
       });
     })
     .catch((err) => {

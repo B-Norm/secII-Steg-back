@@ -14,14 +14,6 @@ const fileSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    mSkip: {
-      type: Number,
-      required: true,
-    },
-    mPeriod: {
-      type: Array,
-      required: true,
-    },
     mSize: {
       type: Number,
       required: true,
